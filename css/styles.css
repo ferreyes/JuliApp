@@ -403,6 +403,18 @@ html, body {
 .circle-btn:active { transform: scale(0.85); }
 .circle-btn svg { width: 100%; height: 100%; }
 
+/* Emoji-based buttons */
+.emoji-btn {
+    font-size: 24px;
+    line-height: 1;
+    padding: 0;
+    text-align: center;
+    -webkit-text-size-adjust: none;
+}
+.mode-btn.emoji-btn {
+    font-size: 22px;
+}
+
 /* Step indicators */
 .step-indicators {
     display: flex;
