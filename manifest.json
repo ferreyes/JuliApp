@@ -1,0 +1,22 @@
+{
+    "name": "JuliApp",
+    "short_name": "JuliApp",
+    "description": "App de dibujo y colorear para Julian",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "landscape",
+    "background_color": "#ffffff",
+    "theme_color": "#6C5CE7",
+    "icons": [
+        {
+            "src": "assets/app-icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "assets/app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
