@@ -4,6 +4,16 @@ const App = {
     currentScreen: 'menu',
     currentTemplate: null,
     currentColorPage: null,
+    _navLock: false,       // Prevents rapid navigation taps
+    _navLockMs: 600,       // ms to ignore subsequent taps after a navigation
+
+    // Wrap navigation actions so rapid/repeated taps are ignored
+    _safeNav(fn) {
+        if (this._navLock) return;
+        this._navLock = true;
+        setTimeout(() => { this._navLock = false; }, this._navLockMs);
+        fn();
+    },
 
     init() {
         Sounds.init();
@@ -33,6 +43,14 @@ const App = {
             lastTouchEnd = now;
         }, { passive: false });
 
+        // Ignore multi-touch everywhere except on drawing canvases
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                const tag = e.target.tagName;
+                if (tag !== 'CANVAS') e.preventDefault();
+            }
+        }, { passive: false });
+
         // Register service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -42,16 +60,13 @@ const App = {
     buildMenu() {
         // 3 main section buttons
         document.getElementById('sec-colorear').addEventListener('click', () => {
-            this.showList('colorear');
-            Sounds.play('pop');
+            this._safeNav(() => { this.showList('colorear'); Sounds.play('pop'); });
         });
         document.getElementById('sec-trazar').addEventListener('click', () => {
-            this.showList('trazar');
-            Sounds.play('pop');
+            this._safeNav(() => { this.showList('trazar'); Sounds.play('pop'); });
         });
         document.getElementById('sec-galeria').addEventListener('click', () => {
-            this.showGallery();
-            Sounds.play('pop');
+            this._safeNav(() => { this.showGallery(); Sounds.play('pop'); });
         });
     },
 
@@ -115,8 +130,7 @@ const App = {
                     `<img src="assets/coloring/${page.file}" alt="${page.name}" onerror="this.parentElement.style.display='none'">` +
                     `<div class="card-label">${page.name}</div>`;
                 card.addEventListener('click', () => {
-                    this.startColoringPng(page);
-                    Sounds.play('pop');
+                    this._safeNav(() => { this.startColoringPng(page); Sounds.play('pop'); });
                 });
                 grid.appendChild(card);
             });
@@ -128,8 +142,7 @@ const App = {
                     card.className = 'drawing-card coloring-card';
                     card.innerHTML = page.preview + `<div class="card-label">${page.name}</div>`;
                     card.addEventListener('click', () => {
-                        this.startColoringBuiltin(key);
-                        Sounds.play('pop');
+                        this._safeNav(() => { this.startColoringBuiltin(key); Sounds.play('pop'); });
                     });
                     grid.appendChild(card);
                 }
@@ -142,8 +155,7 @@ const App = {
                 card.className = 'drawing-card';
                 card.innerHTML = tmpl.preview + `<div class="card-label">${tmpl.name}</div>`;
                 card.addEventListener('click', () => {
-                    this.startDrawing(key);
-                    Sounds.play('pop');
+                    this._safeNav(() => { this.startDrawing(key); Sounds.play('pop'); });
                 });
                 grid.appendChild(card);
             }
@@ -177,8 +189,7 @@ const App = {
     setupButtons() {
         // Guide screen buttons
         document.getElementById('btn-back').addEventListener('click', () => {
-            this.showScreen('menu');
-            Sounds.play('click');
+            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
         });
 
         document.getElementById('btn-undo').addEventListener('click', () => {
@@ -193,14 +204,12 @@ const App = {
         });
 
         document.getElementById('btn-menu').addEventListener('click', () => {
-            this.showScreen('menu');
-            Sounds.play('click');
+            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
         });
 
         // Coloring screen buttons
         document.getElementById('color-btn-back').addEventListener('click', () => {
-            this.showScreen('menu');
-            Sounds.play('click');
+            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
         });
 
         document.getElementById('color-btn-clear').addEventListener('click', () => {
@@ -236,14 +245,12 @@ const App = {
 
         // List screen back
         document.getElementById('list-back').addEventListener('click', () => {
-            this.showScreen('menu');
-            Sounds.play('click');
+            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
         });
 
         // Gallery back
         document.getElementById('gallery-back').addEventListener('click', () => {
-            this.showScreen('menu');
-            Sounds.play('click');
+            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
         });
     },
 

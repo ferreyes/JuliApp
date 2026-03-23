@@ -1,4 +1,4 @@
-const CACHE_NAME = 'drawapp-v5';
+const CACHE_NAME = 'drawapp-v6';
 const ASSETS = [
     '/',
     '/index.html',
@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
         caches.keys()
             .then(keys => Promise.all(keys.map(k => caches.delete(k))))
             .then(() => caches.open(CACHE_NAME))
-            .then(cache => cache.addAll(ASSETS.map(a => a + '?v=5')))
+            .then(cache => cache.addAll(ASSETS.map(a => a + '?v=6')))
             .then(() => self.skipWaiting())
     );
 });
