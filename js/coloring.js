@@ -485,8 +485,6 @@ const Coloring = {
                 pencil.classList.add('active');
                 this.selectedColor = color;
                 Sounds.play('click');
-                // Scroll to center the selected pencil
-                pencil.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             });
             container.appendChild(pencil);
         });
