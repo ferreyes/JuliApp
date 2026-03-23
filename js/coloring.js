@@ -62,7 +62,7 @@ const Coloring = {
     startPng(pageInfo) {
         this.isPng = true;
         this.page = null;
-        this.mode = 'fill';
+        this.mode = 'paint';
         this.undoStack = [];
         this.resize();
         this.clearAll();
@@ -86,7 +86,7 @@ const Coloring = {
         this.page = BUILTIN_COLORING[key];
         if (!this.page) return;
         this.regionColors = {};
-        this.mode = 'fill';
+        this.mode = 'paint';
         this.resize();
         this.clearAll();
         this.updateModeButtons();
