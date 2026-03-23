@@ -112,7 +112,7 @@ const App = {
                 const card = document.createElement('button');
                 card.className = 'drawing-card coloring-card';
                 card.innerHTML =
-                    `<img src="assets/coloring/${page.file}" alt="${page.name}" style="width:100%;height:100%;object-fit:contain" onerror="this.parentElement.style.display='none'">` +
+                    `<img src="assets/coloring/${page.file}" alt="${page.name}" onerror="this.parentElement.style.display='none'">` +
                     `<div class="card-label">${page.name}</div>`;
                 card.addEventListener('click', () => {
                     this.startColoringPng(page);
