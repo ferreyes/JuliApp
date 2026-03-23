@@ -497,8 +497,11 @@ const Coloring = {
         const paintBtn = document.getElementById('mode-paint');
         if (fillBtn) fillBtn.classList.toggle('active', this.mode === 'fill');
         if (paintBtn) paintBtn.classList.toggle('active', this.mode === 'paint');
-        this.paintCanvas.style.pointerEvents = this.mode === 'paint' ? 'auto' : 'none';
-        this.paintCanvas.style.zIndex = this.mode === 'paint' ? '5' : '3';
+        // Paint canvas is always BELOW the outline canvas (z-index 2 vs outline at 3)
+        // so that brush strokes never cover the black lines.
+        // In paint mode, we capture touches on the outline canvas and relay to paint.
+        this.paintCanvas.style.pointerEvents = 'none';
+        this.paintCanvas.style.zIndex = '2';
     },
 
     // ===================== UNDO =====================
@@ -585,13 +588,31 @@ const Coloring = {
     // ===================== EVENTS =====================
 
     setupEvents() {
-        // Fill mode - tap on outline canvas
+        // All touch/click events go through the outline canvas (topmost interactive layer).
+        // In fill mode: flood fill at tap point.
+        // In paint mode: relay strokes to the paintCanvas (which sits BELOW outlines).
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (this.mode !== 'fill') return;
             const t = e.touches[0];
             if (t.clientY < 70 || t.clientY > window.innerHeight - 90) return;
-            this._handleFillTap(t.clientX, t.clientY);
+            if (this.mode === 'fill') {
+                this._handleFillTap(t.clientX, t.clientY);
+            } else {
+                this.pushUndo();
+                this.startPaint(t.clientX, t.clientY);
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (this.mode !== 'paint' || !this.isDrawing) return;
+            const t = e.touches[0];
+            this.movePaint(t.clientX, t.clientY);
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (this.mode === 'paint') this.endPaint();
         }, { passive: false });
 
         this.canvas.addEventListener('click', (e) => {
@@ -600,41 +621,21 @@ const Coloring = {
             this._handleFillTap(e.clientX, e.clientY);
         });
 
-        // Paint mode
-        this.paintCanvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+        this.canvas.addEventListener('mousedown', (e) => {
             if (this.mode !== 'paint') return;
-            const t = e.touches[0];
-            if (t.clientY < 70 || t.clientY > window.innerHeight - 90) return;
-            const rect = this.paintCanvas.getBoundingClientRect();
-            this.startPaint(t.clientX - rect.left, t.clientY - rect.top);
-        }, { passive: false });
-
-        this.paintCanvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!this.isDrawing) return;
-            const t = e.touches[0];
-            const rect = this.paintCanvas.getBoundingClientRect();
-            this.movePaint(t.clientX - rect.left, t.clientY - rect.top);
-        }, { passive: false });
-
-        this.paintCanvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            this.endPaint();
-        }, { passive: false });
-
-        this.paintCanvas.addEventListener('mousedown', (e) => {
-            if (this.mode !== 'paint') return;
-            const rect = this.paintCanvas.getBoundingClientRect();
-            this.startPaint(e.clientX - rect.left, e.clientY - rect.top);
+            this.pushUndo();
+            this.startPaint(e.clientX, e.clientY);
         });
-        this.paintCanvas.addEventListener('mousemove', (e) => {
-            if (!this.isDrawing) return;
-            const rect = this.paintCanvas.getBoundingClientRect();
-            this.movePaint(e.clientX - rect.left, e.clientY - rect.top);
+        this.canvas.addEventListener('mousemove', (e) => {
+            if (this.mode !== 'paint' || !this.isDrawing) return;
+            this.movePaint(e.clientX, e.clientY);
         });
-        this.paintCanvas.addEventListener('mouseup', () => this.endPaint());
-        this.paintCanvas.addEventListener('mouseleave', () => this.endPaint());
+        this.canvas.addEventListener('mouseup', () => {
+            if (this.mode === 'paint') this.endPaint();
+        });
+        this.canvas.addEventListener('mouseleave', () => {
+            if (this.mode === 'paint') this.endPaint();
+        });
     },
 
     _handleFillTap(clientX, clientY) {
