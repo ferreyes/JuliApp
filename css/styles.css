@@ -588,7 +588,19 @@ html, body {
     flex-direction: column;
 }
 
+/* Layer order: fill(1) -> paint(2) -> outlines(4)
+   Paint strokes always go BELOW the black outlines
+   so lines are never covered by the brush */
 #fill-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    touch-action: none;
+    pointer-events: none;
+}
+
+#paint-canvas {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
@@ -603,15 +615,6 @@ html, body {
     width: 100%; height: 100%;
     z-index: 4;
     touch-action: none;
-}
-
-#paint-canvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 3;
-    touch-action: none;
-    pointer-events: none;
 }
 
 .color-top-bar {

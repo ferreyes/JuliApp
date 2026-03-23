@@ -1,4 +1,4 @@
-const CACHE_NAME = 'drawapp-v3';
+const CACHE_NAME = 'drawapp-v5';
 const ASSETS = [
     '/',
     '/index.html',
@@ -15,8 +15,11 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(ASSETS))
+        // Delete ALL old caches first, then fetch fresh assets
+        caches.keys()
+            .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+            .then(() => caches.open(CACHE_NAME))
+            .then(cache => cache.addAll(ASSETS.map(a => a + '?v=5')))
             .then(() => self.skipWaiting())
     );
 });
@@ -30,7 +33,20 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Strip cache-busting query params for matching
+    const url = new URL(event.request.url);
+    url.search = '';
+    const cleanRequest = new Request(url.toString());
+
     event.respondWith(
-        caches.match(event.request).then(r => r || fetch(event.request))
+        // Try network first for JS/CSS, fall back to cache
+        fetch(event.request)
+            .then(response => {
+                // Cache the fresh response
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(cleanRequest, clone));
+                return response;
+            })
+            .catch(() => caches.match(cleanRequest).then(r => r || caches.match(event.request)))
     );
 });
