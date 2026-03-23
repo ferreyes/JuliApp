@@ -487,7 +487,9 @@ html, body {
 }
 .color-pencil:active { transform: scale(0.9); }
 .color-pencil.active {
-    transform: translateY(-16px) scale(1.06);
+    transform: translateY(-28px) scale(1.25);
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+    z-index: 10;
 }
 
 /* Color tip (small triangle at very top) */
