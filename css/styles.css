@@ -456,6 +456,7 @@ html, body {
     display: flex;
     gap: 4px;
     padding: 6px 16px;
+    padding-top: 45px;
     background: transparent;
     pointer-events: auto;
     overflow-x: auto;
@@ -667,9 +668,9 @@ html, body {
 .color-bottom-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 120px;
+    height: 165px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     z-index: 20;
     pointer-events: none;
