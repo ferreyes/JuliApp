@@ -189,7 +189,7 @@ const App = {
     setupButtons() {
         // Guide screen buttons
         document.getElementById('btn-back').addEventListener('click', () => {
-            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
+            this._safeNav(() => { this.showList('trazar'); Sounds.play('click'); });
         });
 
         document.getElementById('btn-undo').addEventListener('click', () => {
@@ -204,12 +204,12 @@ const App = {
         });
 
         document.getElementById('btn-menu').addEventListener('click', () => {
-            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
+            this._safeNav(() => { this.showList('trazar'); Sounds.play('click'); });
         });
 
         // Coloring screen buttons
         document.getElementById('color-btn-back').addEventListener('click', () => {
-            this._safeNav(() => { this.showScreen('menu'); Sounds.play('click'); });
+            this._safeNav(() => { this.showList('colorear'); Sounds.play('click'); });
         });
 
         document.getElementById('color-btn-clear').addEventListener('click', () => {
