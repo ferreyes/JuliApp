@@ -49,6 +49,29 @@ const Guide = {
         };
     },
 
+    // Interpolate points along the path so we have dense checkpoints
+    // spacing = min pixels between interpolated points
+    interpolatePoints(points, spacing) {
+        if (points.length < 2) return points;
+        const result = [points[0]];
+        for (let i = 1; i < points.length; i++) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const dx = curr.x - prev.x;
+            const dy = curr.y - prev.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            const steps = Math.max(1, Math.floor(d / spacing));
+            for (let s = 1; s <= steps; s++) {
+                const t = s / steps;
+                result.push({
+                    x: prev.x + dx * t,
+                    y: prev.y + dy * t
+                });
+            }
+        }
+        return result;
+    },
+
     startTemplate(templateKey) {
         this.template = TEMPLATES[templateKey];
         if (!this.template) return;
@@ -136,8 +159,9 @@ const Guide = {
 
         const step = this.template.steps[index];
 
-        // Scale points
-        this.stepTargetPoints = step.points.map(p => this.scalePoint(p));
+        // Scale points and interpolate for denser coverage
+        const scaledPoints = step.points.map(p => this.scalePoint(p));
+        this.stepTargetPoints = this.interpolatePoints(scaledPoints, 15);
 
         // Clear guide canvas and draw dotted path
         this.guideCtx.clearRect(0, 0, this.guideCanvas.width, this.guideCanvas.height);
@@ -337,14 +361,15 @@ const Guide = {
         ctx.globalAlpha = 1;
 
         // Check if step is close enough to complete
-        if (this.traceProgress > 0.45) {
+        if (this.traceProgress > 0.7) {
             this.completeStep();
         }
     },
 
     checkTraceProgress(point) {
         // Check how many target points the user has passed near
-        const threshold = 40 * (window.innerWidth / 400); // Scale threshold
+        // Tighter threshold so kid must trace closer to the dotted line
+        const threshold = 22 * (window.innerWidth / 400); // Scale threshold
         let nearCount = 0;
 
         for (const tp of this.stepTargetPoints) {
